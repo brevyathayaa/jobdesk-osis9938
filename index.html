@@ -1,3 +1,70 @@
+a<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Manajemen Jobdesk</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- TAMPILAN 1: POPUP LOGIN -->
+  <div id="login-modal" class="modal">
+    <div class="modal-content">
+      <h2>Sistem Jobdesk Organisasi</h2>
+      <p>Masukkan kata sandi/nama akun Anda:</p>
+      <input type="password" id="password-input" placeholder="Masukkan password...">
+      <button id="login-btn">Masuk</button>
+      <p id="login-error" class="error-msg"></p>
+    </div>
+  </div>
+
+  <!-- CONTAINER UTAMA -->
+  <div id="app-container" class="container hidden">
+    
+    <!-- HEADER -->
+    <header class="app-header">
+      <div id="user-info">
+        <span>Pengguna: <strong id="current-user-name">-</strong></span>
+      </div>
+      <button id="logout-btn" class="btn-secondary">Keluar</button>
+    </header>
+
+    <!-- TAMPILAN 2: FOLDER DIVISI (GRID 2x6 + 1) -->
+    <section id="division-view" class="view">
+      <h3 class="section-title">Pilih Divisi</h3>
+      <div class="division-grid">
+        <button class="div-card" data-division="Acara">Acara</button>
+        <button class="div-card" data-division="Humas">Humas</button>
+        <button class="div-card" data-division="Keamanan">Keamanan</button>
+        <button class="div-card" data-division="Perlengkapan">Perlengkapan</button>
+        <button class="div-card" data-division="Dokumentasi">Dokumentasi</button>
+        <button class="div-card" data-division="Perlombaan">Perlombaan</button>
+        <div class="div-card free-card" id="free-card">
+          <span>Free (Belum Mengambil Jobdesk)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAMPILAN 3: SAKLAR JOBDESK -->
+    <section id="jobdesk-view" class="view hidden">
+      <div class="view-header">
+        <button id="back-btn" class="btn-back">← Kembali</button>
+        <h3 id="selected-division-title">Divisi</h3>
+      </div>
+      <div id="jobdesk-container" class="jobdesk-list">
+        <!-- Saklar jobdesk akan dirender secara dinamis melalui JavaScript -->
+      </div>
+    </section>
+
+  </div>
+
+  <!-- FIREBASE SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
 <!DOCTYPE html>
 <html lang="en">
 <head>
