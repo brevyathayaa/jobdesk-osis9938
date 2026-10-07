@@ -1,5 +1,7 @@
-// CONFIGURASI FIREBASE
-// Ganti dengan konfigurasi Firebase Realtime Database Anda sendiri
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+// Tempelkan konfigurasi firebase milikmu di sini
 const firebaseConfig = {
   apiKey: "AIzaSyDW_zwnrVC5R7-1lZ8dKTSDuYF7Ir4qiMc",
   authDomain: "jobdesk-osis99.firebaseapp.com",
@@ -11,172 +13,100 @@ const firebaseConfig = {
   measurementId: "G-4Z0S6VRL5C"
 };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-// DAFTAR AKUN TERDAPTAR (31 AKUN)
-const validAccounts = [
-  "keysa", "Haerunnisa", "Winky", "Brevy", "Ibam", "Asyifa", "Mario", 
-  "Aulya", "Faatiya", "Quinzha", "Lolita", "Azizah", "Danish", 
-  "Ameliatuzzahra", "Syifa", "Ibnu", "Sangaji", "Shadrina", "Tiara", 
-  "Adya", "Luvna", "Natasya", "Eka", "Syahira", "Marsya", "Aura", 
-  "Rahma", "Sazkia", "Auria", "Aurel", "Alifah"
-];
-
-// STRUKTUR JOBDESK
-const jobdeskData = {
-  "Acara": ["RD", "Jarkom", "Live Report"],
-  "Humas": ["Jarkom", "Pusin"],
-  "Keamanan": ["Gerbang Utama", "Pintu dekat FC", "Pintu dekat Pusin", "Pintu Kantin", "Gembok"],
-  "Perlengkapan": ["Konsum", "Barang"],
-  "Dokumentasi": ["IG Story", "IG Post"],
-  "Perlombaan": ["Lomba A", "Lomba B", "Lomba C"]
+// Data Akun Kunci
+const userAccounts = {
+  "keysa": "Keysa", "winky": "Winky", "alif": "Alif", "aqila": "Aqila",
+  "dhafin": "Dhafin", "fakhri": "Fakhri", "zahra": "Zahra", "naufal": "Naufal"
 };
 
 let currentUser = null;
-let currentDivision = null;
+let allData = {};
 
-// ELEMEN DOM
-const loginModal = document.getElementById('login-modal');
-const passwordInput = document.getElementById('password-input');
-const loginBtn = document.getElementById('login-btn');
-const loginError = document.getElementById('login-error');
-const appContainer = document.getElementById('app-container');
-const currentUserNav = document.getElementById('current-user-name');
-const logoutBtn = document.getElementById('logout-btn');
+// Element Selector
+const loginModal = document.getElementById("login-modal");
+const appContainer = document.getElementById("app-container");
+const passwordInput = document.getElementById("password-input");
+const loginBtn = document.getElementById("login-btn");
+const loginError = document.getElementById("login-error");
+const userDisplay = document.getElementById("user-display");
+const logoutBtn = document.getElementById("logout-btn");
+const divCards = document.querySelectorAll(".div-card");
+const detailSection = document.getElementById("division-detail");
+const currentDivName = document.getElementById("current-division-name");
+const membersList = document.getElementById("members-list");
+const backBtn = document.getElementById("back-btn");
 
-const divisionView = document.getElementById('division-view');
-const jobdeskView = document.getElementById('jobdesk-view');
-const jobdeskContainer = document.getElementById('jobdesk-container');
-const selectedDivisionTitle = document.getElementById('selected-division-title');
-const backBtn = document.getElementById('back-btn');
-
-// SYSTEM LOGIN
-loginBtn.addEventListener('click', handleLogin);
-passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleLogin(); });
-
-function handleLogin() {
-  const inputVal = passwordInput.value.trim();
-  const foundUser = validAccounts.find(acc => acc.toLowerCase() === inputVal.toLowerCase());
-
-  if (foundUser) {
-    currentUser = foundUser;
-    currentUserNav.textContent = currentUser;
-    loginModal.classList.add('hidden');
-    appContainer.classList.remove('hidden');
-    passwordInput.value = '';
-    loginError.textContent = '';
-    
-    // Pantau status akun untuk memeriksa opsi "Free"
-    listenToGlobalJobdeskStatus();
+// Login Logic
+loginBtn.addEventListener("click", () => {
+  const pass = passwordInput.value.trim().toLowerCase();
+  if (userAccounts[pass]) {
+    currentUser = userAccounts[pass];
+    userDisplay.innerText = `Pengguna: ${currentUser}`;
+    loginModal.classList.add("hidden");
+    appContainer.classList.remove("hidden");
+    loginError.innerText = "";
   } else {
-    loginError.textContent = "Password/Akun tidak ditemukan.";
+    loginError.innerText = "Kata sandi salah. Coba lagi.";
   }
-}
+});
 
-logoutBtn.addEventListener('click', () => {
+logoutBtn.addEventListener("click", () => {
   currentUser = null;
-  appContainer.classList.add('hidden');
-  loginModal.classList.remove('hidden');
+  appContainer.classList.add("hidden");
+  loginModal.classList.remove("hidden");
+  passwordInput.value = "";
 });
 
-// NAVIGASI DIVISI
-document.querySelectorAll('.div-card[data-division]').forEach(card => {
-  card.addEventListener('click', () => {
-    currentDivision = card.getAttribute('data-division');
-    openJobdeskView(currentDivision);
+// Realtime Listener Firebase
+onValue(ref(db, "jobdesk/"), (snapshot) => {
+  allData = snapshot.val() || {};
+});
+
+// Filter Divisi
+divCards.forEach(card => {
+  card.addEventListener("click", () => {
+    const divisi = card.getAttribute("data-divisi");
+    showDivision(divisi);
   });
 });
 
-backBtn.addEventListener('click', () => {
-  jobdeskView.classList.add('hidden');
-  divisionView.classList.remove('hidden');
-  currentDivision = null;
+backBtn.addEventListener("click", () => {
+  detailSection.classList.add("hidden");
 });
 
-function openJobdeskView(division) {
-  selectedDivisionTitle.textContent = `Divisi ${division}`;
-  divisionView.classList.add('hidden');
-  jobdeskView.classList.remove('hidden');
-  
-  listenToJobdeskUpdates(division);
-}
+function showDivision(divisi) {
+  currentDivName.innerText = `Divisi: ${divisi}`;
+  membersList.innerHTML = "";
+  detailSection.classList.remove("hidden");
 
-// REALTIME DATABASE MANAGEMENT
-function listenToJobdeskUpdates(division) {
-  const divisionRef = db.ref(`jobdesks/${division}`);
-  
-  divisionRef.on('value', (snapshot) => {
-    const data = snapshot.val() || {};
-    renderJobdesks(division, data);
-  });
-}
+  Object.keys(userAccounts).forEach(key => {
+    const name = userAccounts[key];
+    const userDiv = allData[name] || "Free";
 
-function renderJobdesks(division, activeData) {
-  jobdeskContainer.innerHTML = '';
-  const list = jobdeskData[division] || [];
+    if ((divisi === "Free" && userDiv === "Free") || (userDiv === divisi)) {
+      const item = document.createElement("div");
+      item.className = "member-card";
+      
+      const isMe = name === currentUser;
+      item.innerHTML = `
+        <div class="member-info">
+          <h4>${name}</h4>
+          <p>Status: ${userDiv}</p>
+        </div>
+        ${isMe ? `<button class="btn btn-primary claim-btn" data-user="${name}">Pilih Ke Divisi Ini</button>` : ''}
+      `;
 
-  list.forEach(jobName => {
-    const assignedUser = activeData[jobName] || null;
-    const isTaken = assignedUser !== null;
-    const isTakenByMe = assignedUser === currentUser;
-
-    const switchBtn = document.createElement('button');
-    switchBtn.className = `jobdesk-switch ${isTaken ? 'on' : 'off'}`;
-    
-    switchBtn.innerHTML = `
-      <div class="switch-title">${jobName}</div>
-      <div class="switch-user">${isTaken ? assignedUser : 'Belum diambil'}</div>
-    `;
-
-    switchBtn.addEventListener('click', () => {
-      toggleJobdesk(division, jobName, assignedUser);
-    });
-
-    jobdeskContainer.appendChild(switchBtn);
-  });
-}
-
-function toggleJobdesk(division, jobName, assignedUser) {
-  const jobRef = db.ref(`jobdesks/${division}/${jobName}`);
-
-  if (assignedUser === null) {
-    // Ambil Jobdesk
-    jobRef.set(currentUser);
-  } else if (assignedUser === currentUser) {
-    // Lepas Jobdesk
-    jobRef.remove();
-  } else {
-    alert(`Jobdesk ini sedang dikerjakan oleh ${assignedUser}`);
-  }
-}
-
-// PANTAU APAKAH PENGGUNA MASUK DALAM KATEGORI "FREE"
-function listenToGlobalJobdeskStatus() {
-  const allJobdesksRef = db.ref('jobdesks');
-  const freeCard = document.getElementById('free-card');
-
-  allJobdesksRef.on('value', (snapshot) => {
-    const data = snapshot.val() || {};
-    let hasJob = false;
-
-    // Cek seluruh divisi apakah nama pengguna terdaftar
-    Object.keys(data).forEach(div => {
-      Object.keys(data[div]).forEach(job => {
-        if (data[div][job] === currentUser) {
-          hasJob = true;
-        }
-      });
-    });
-
-    if (!hasJob) {
-      freeCard.style.backgroundColor = "#e2e8f0";
-      freeCard.style.color = "#2d3748";
-      freeCard.innerHTML = `<span>Status: <strong>Free</strong> (Belum memilih jobdesk)</span>`;
-    } else {
-      freeCard.style.backgroundColor = "#edf2f7";
-      freeCard.style.color = "#a0aec0";
-      freeCard.innerHTML = `<span>Status: <strong>Aktif bekerja</strong></span>`;
+      membersList.appendChild(item);
     }
+  });
+
+  document.querySelectorAll(".claim-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const targetUser = e.target.getAttribute("data-user");
+      set(ref(db, `jobdesk/${targetUser}`), divisi);
+    });
   });
 }
