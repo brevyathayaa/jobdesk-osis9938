@@ -66,7 +66,6 @@ body {
   gap: 12px;
 }
 
-/* WRAPPER PASSWORD & INPUT SERAGAM */
 .password-wrapper {
   position: relative;
   width: 100%;
@@ -120,236 +119,6 @@ body {
 
 /* BUTTONS */
 .btn {
-  padding: 12px 18px;
-  border-radius: var(--radius);
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-primary {
-  background: var(--primary);
-  color: white;
-}
-
-.btn-primary:hover {
-  background: var(--primary-hover);
-}
-
-.btn-secondary {
-  background: #e2e8f0;
-  color: var(--text-main);
-}
-
-.btn-outline {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-}
-
-/* NAVBAR */
-.navbar {
-  background: var(--card-bg);
-  padding: 16px 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--border);
-}
-
-.brand h1 {
-  font-size: 1.25rem;
-  font-weight: 700;
-}
-
-.user-badge {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-}
-
-/* MAIN CONTENT */
-.main-content {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 32px 20px;
-}
-
-.section-title {
-  margin-bottom: 24px;
-}
-
-.section-title h2 {
-  font-size: 1.5rem;
-}
-
-.section-title p {
-  color: var(--text-muted);
-}
-
-/* DIVISION GRID */
-.division-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
-  margin-bottom: 32px;
-}
-
-.div-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  padding: 20px;
-  border-radius: var(--radius);
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.2s;
-}
-
-.div-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow);
-  border-color: var(--primary);
-}
-
-.div-icon {
-  font-size: 1.8rem;
-}
-
-.div-card h3 {
-  font-size: 1rem;
-}
-
-/* MEMBERS LIST */
-.detail-section {
-  background: var(--card-bg);
-  padding: 24px;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-}
-
-.detail-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.members-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.member-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-}
-
-.member-info h4 {
-  font-size: 0.95rem;
-}
-
-.member-info p {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-:root {
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
-  --bg-main: #f8fafc;
-  --card-bg: #ffffff;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --border: #e2e8f0;
-  --radius: 12px;
-  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-}
-
-body {
-  background-color: var(--bg-main);
-  color: var(--text-main);
-  min-height: 100vh;
-}
-
-.hidden {
-  display: none !important;
-}
-
-/* MODAL LOGIN */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  z-index: 1000;
-}
-
-.modal-card {
-  background: var(--card-bg);
-  padding: 32px;
-  border-radius: 16px;
-  width: 100%;
-  max-width: 400px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-}
-
-.modal-header h2 {
-  font-size: 1.5rem;
-  margin-bottom: 8px;
-}
-
-.modal-header p {
-  color: var(--text-muted);
-  font-size: 0.875rem;
-  margin-bottom: 24px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-input[type="password"] {
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  outline: none;
-  font-size: 0.95rem;
-}
-
-input[type="password"]:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
-}
-
-.error-msg {
-  color: #ef4444;
-  font-size: 0.85rem;
-  margin-top: 8px;
-}
-
-/* BUTTONS */
-.btn {
   padding: 10px 18px;
   border-radius: var(--radius);
   border: none;
@@ -378,6 +147,24 @@ input[type="password"]:focus {
   color: var(--text-muted);
 }
 
+.btn-success {
+  background: #10b981;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #059669;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+}
+
 /* NAVBAR */
 .navbar {
   background: var(--card-bg);
@@ -452,7 +239,7 @@ input[type="password"]:focus {
   font-size: 1rem;
 }
 
-/* MEMBERS LIST */
+/* MEMBERS LIST & ACTIVE WORKERS */
 .detail-section {
   background: var(--card-bg);
   padding: 24px;
@@ -463,8 +250,40 @@ input[type="password"]:focus {
 .detail-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 20px;
+  gap: 16px;
+}
+
+.active-workers-box {
+  margin-top: 8px;
+  padding: 10px 14px;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+}
+
+.active-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #166534;
+
+}
+
+.workers-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.worker-chip {
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 600;
 }
 
 .members-grid {
@@ -477,16 +296,35 @@ input[type="password"]:focus {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
+  padding: 14px 18px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
 }
 
 .member-info h4 {
-  font-size: 0.95rem;
+  font-size: 1rem;
 }
 
 .member-info p {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-working {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.badge-idle {
+  background: #f1f5f9;
+  color: #475569;
 }
