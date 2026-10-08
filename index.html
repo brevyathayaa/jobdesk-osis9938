@@ -77,9 +77,19 @@
       <!-- DETAIL DIVISI & DAFTAR ANGGOTA -->
       <section id="division-detail" class="detail-section hidden">
         <div class="detail-header">
-          <h2 id="current-division-name">Divisi: -</h2>
+          <div>
+            <h2 id="current-division-name">Divisi: -</h2>
+            <!-- DUKUNGAN TAMPILAN ANGGOTA SEDANG MENGERJAKAN -->
+            <div id="active-workers-container" class="active-workers-box hidden">
+              <span class="active-title">Sedang mengerjakan tugas:</span>
+              <div id="active-workers-list" class="workers-chips"></div>
+            </div>
+          </div>
           <button id="back-btn" class="btn btn-secondary">← Kembali</button>
         </div>
+
+        <!-- TOMBOL PINDAH DIVISI -->
+        <div id="change-div-container"></div>
 
         <div id="members-list" class="members-grid">
           <!-- Item anggota akan muncul di sini secara otomatis -->
