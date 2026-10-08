@@ -27,6 +27,16 @@ const userAccounts = {
   "auria": "Auria", "aurel": "Aurel", "alifah": "Alifah"
 };
 
+// Daftar Jobdesk Per Divisi
+const divisionJobdesks = {
+  "Acara": ["Run Down", "Bagan", "Live Report", "Jarkom", "Rekap Hasil"],
+  "Humas": ["Pusat Informasi", "Jarkom", "Perwakilan Divisi"],
+  "Keamanan": ["Gerbang Utama", "Pintu Dekat FC", "Pintu Dekat Pusin", "Pintu Kantin", "Gembok"],
+  "Perlengkapan": ["Konsum", "Barang"],
+  "Dokumentasi": ["IG Story", "IG Post"],
+  "Perlombaan": ["Perlombaan A", "Perlombaan B", "Perlombaan C", "Perlombaan D", "Perlombaan E"]
+};
+
 let currentUser = null;
 let currentSelectedDivisi = "Free";
 let allData = {};
@@ -44,11 +54,9 @@ const divCards = document.querySelectorAll(".div-card");
 const detailSection = document.getElementById("division-detail");
 const currentDivName = document.getElementById("current-division-name");
 const membersList = document.getElementById("members-list");
-const activeWorkersContainer = document.getElementById("active-workers-container");
-const activeWorkersList = document.getElementById("active-workers-list");
 const backBtn = document.getElementById("back-btn");
 
-// Fitur Lihat/Sembunyikan Kata Sandi
+// Toggle Show/Hide Password
 togglePassword.addEventListener("click", () => {
   const isPassword = passwordInput.getAttribute("type") === "password";
   passwordInput.setAttribute("type", isPassword ? "text" : "password");
@@ -90,7 +98,7 @@ onValue(ref(db, "jobdesk/"), (snapshot) => {
   }
 });
 
-// Pilih Divisi
+// Select Divisi
 divCards.forEach(card => {
   card.addEventListener("click", () => {
     const divisi = card.getAttribute("data-divisi");
@@ -111,91 +119,87 @@ function showDivision(divisi) {
 
 function renderMembers(divisi) {
   membersList.innerHTML = "";
-  activeWorkersList.innerHTML = "";
 
-  const myData = allData[currentUser] || { divisi: "Free", status: "idle" };
-  const isWorkingHere = (myData.divisi === divisi && myData.status === "working");
+  // 1. TAMPILAN DIVISI DENGAN JOBDESK (Acara, Humas, Keamanan, Perlengkapan, Dokumentasi, Perlombaan)
+  if (divisi !== "Free" && divisionJobdesks[divisi]) {
+    const jobdesks = divisionJobdesks[divisi];
 
-  // A. JIKA MEMBUKA DIVISI BIASA (Acara, Humas, Keamanan, dll)
-  if (divisi !== "Free") {
-    const actionCard = document.createElement("div");
-    actionCard.className = "member-card";
-    actionCard.style.padding = "20px";
+    jobdesks.forEach(jobdeskTitle => {
+      const card = document.createElement("div");
+      card.className = "jobdesk-card";
 
-    actionCard.innerHTML = `
-      <div class="member-info">
-        <h4>Ambil Tugas Divisi ${divisi}</h4>
-        <p>${isWorkingHere ? 'Anda sedang mengerjakan tugas di divisi ini.' : 'Tekan tombol di samping untuk mulai mengerjakan tugas divisi ini.'}</p>
-      </div>
-      <div class="member-actions">
-        <button class="btn ${isWorkingHere ? 'btn-danger' : 'btn-success'} main-work-btn">
-          ${isWorkingHere ? 'Selesai' : 'Kerjakan'}
-        </button>
-      </div>
-    `;
-
-    membersList.appendChild(actionCard);
-
-    const workBtn = actionCard.querySelector(".main-work-btn");
-    workBtn.addEventListener("click", () => {
-      if (isWorkingHere) {
-        // Tekan SELESAI -> Kembalikan otomatis ke "Belum Mengambil Jobdesk"
-        set(ref(db, `jobdesk/${currentUser}`), {
-          divisi: "Free",
-          status: "idle"
-        });
-      } else {
-        // Tekan KERJAKAN -> Status menjadi working di divisi ini
-        set(ref(db, `jobdesk/${currentUser}`), {
-          divisi: divisi,
-          status: "working"
-        });
-      }
-    });
-
-    // Cari dan tampilkan nama siapa saja yang sedang menekan "Kerjakan" di divisi ini
-    let activeWorkers = [];
-    Object.keys(userAccounts).forEach(key => {
-      const name = userAccounts[key];
-      const userData = allData[name] || { divisi: "Free", status: "idle" };
-      if (userData.divisi === divisi && userData.status === "working") {
-        activeWorkers.push(name);
-      }
-    });
-
-    if (activeWorkers.length > 0) {
-      activeWorkersContainer.classList.remove("hidden");
-      activeWorkers.forEach(worker => {
-        const chip = document.createElement("span");
-        chip.className = "worker-chip";
-        chip.innerText = `👤 ${worker}`;
-        activeWorkersList.appendChild(chip);
+      // Cari siapa saja yang sedang mengerjakan jobdesk ini
+      let activeWorkers = [];
+      Object.keys(userAccounts).forEach(key => {
+        const name = userAccounts[key];
+        const userData = allData[name] || {};
+        if (userData.divisi === divisi && userData.jobdesk === jobdeskTitle && userData.status === "working") {
+          activeWorkers.push(name);
+        }
       });
-    } else {
-      activeWorkersContainer.classList.add("hidden");
-    }
 
-  // B. JIKA MEMBUKA MENU "BELUM MENGAMBIL JOBDESK"
+      const isMeWorkingHere = activeWorkers.includes(currentUser);
+
+      card.innerHTML = `
+        <div class="jobdesk-info">
+          <h3>📌 ${jobdeskTitle}</h3>
+          <div class="workers-container">
+            <span class="worker-label">Sedang mengerjakan:</span>
+            <div class="worker-tags">
+              ${activeWorkers.length > 0 
+                ? activeWorkers.map(w => `<span class="worker-chip">👤 ${w}</span>`).join('') 
+                : '<span class="empty-text">Belum ada yang mengerjakan</span>'}
+            </div>
+          </div>
+        </div>
+        <div class="jobdesk-action">
+          <button class="btn ${isMeWorkingHere ? 'btn-danger' : 'btn-success'} work-btn">
+            ${isMeWorkingHere ? 'Selesai' : 'Kerjakan'}
+          </button>
+        </div>
+      `;
+
+      membersList.appendChild(card);
+
+      const actionBtn = card.querySelector(".work-btn");
+      actionBtn.addEventListener("click", () => {
+        if (isMeWorkingHere) {
+          // SELESAI -> Kembalikan otomatis ke "Belum Mengambil Jobdesk"
+          set(ref(db, `jobdesk/${currentUser}`), {
+            divisi: "Free",
+            jobdesk: "-",
+            status: "idle"
+          });
+        } else {
+          // KERJAKAN -> Masukkan ke jobdesk ini secara khusus
+          set(ref(db, `jobdesk/${currentUser}`), {
+            divisi: divisi,
+            jobdesk: jobdeskTitle,
+            status: "working"
+          });
+        }
+      });
+    });
+
+  // 2. TAMPILAN DAFTAR "BELUM MENGAMBIL JOBDESK"
   } else {
-    activeWorkersContainer.classList.add("hidden");
-
     Object.keys(userAccounts).forEach(key => {
       const name = userAccounts[key];
       const userData = allData[name] || { divisi: "Free", status: "idle" };
 
-      // Anggota masuk daftar ini jika tidak sedang mengerjakan tugas apapun
+      // Muncul di daftar ini jika status tidak sedang mengerjakan tugas apapun
       if (userData.status !== "working" || userData.divisi === "Free") {
-        const item = document.createElement("div");
-        item.className = "member-card";
-        
+        const card = document.createElement("div");
+        card.className = "member-card";
+
         const isMe = name === currentUser;
-        item.innerHTML = `
+        card.innerHTML = `
           <div class="member-info">
             <h4>${name} ${isMe ? '(Anda)' : ''}</h4>
             <p>Status: <span class="badge badge-idle">Belum Mengambil Jobdesk</span></p>
           </div>
         `;
-        membersList.appendChild(item);
+        membersList.appendChild(card);
       }
     });
   }
