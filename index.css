@@ -85,13 +85,6 @@ body {
   background-color: #ffffff;
   color: var(--text-main);
   box-sizing: border-box;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.password-wrapper input[type="password"]:focus,
-.password-wrapper input[type="text"]:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
 }
 
 #toggle-password {
@@ -103,11 +96,6 @@ body {
   border: none;
   cursor: pointer;
   font-size: 1.1rem;
-  line-height: 1;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   color: var(--text-muted);
 }
 
@@ -127,45 +115,16 @@ body {
   transition: all 0.2s;
 }
 
-.btn-primary {
-  background: var(--primary);
-  color: white;
-}
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-secondary { background: #e2e8f0; color: var(--text-main); }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+.btn-success { background: #10b981; color: white; }
+.btn-success:hover { background: #059669; }
+.btn-danger { background: #ef4444; color: white; }
+.btn-danger:hover { background: #dc2626; }
 
-.btn-primary:hover {
-  background: var(--primary-hover);
-}
-
-.btn-secondary {
-  background: #e2e8f0;
-  color: var(--text-main);
-}
-
-.btn-outline {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-}
-
-.btn-success {
-  background: #10b981;
-  color: white;
-}
-
-.btn-success:hover {
-  background: #059669;
-}
-
-.btn-danger {
-  background: #ef4444;
-  color: white;
-}
-
-.btn-danger:hover {
-  background: #dc2626;
-}
-
-/* NAVBAR */
+/* NAVBAR & MAIN */
 .navbar {
   background: var(--card-bg);
   padding: 16px 24px;
@@ -175,34 +134,13 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
-.brand h1 {
-  font-size: 1.25rem;
-  font-weight: 700;
-}
-
-.user-badge {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-}
-
-/* MAIN CONTENT */
 .main-content {
   max-width: 1000px;
   margin: 0 auto;
   padding: 32px 20px;
 }
 
-.section-title {
-  margin-bottom: 24px;
-}
-
-.section-title h2 {
-  font-size: 1.5rem;
-}
-
-.section-title p {
-  color: var(--text-muted);
-}
+.section-title { margin-bottom: 24px; }
 
 /* DIVISION GRID */
 .division-grid {
@@ -231,15 +169,7 @@ body {
   border-color: var(--primary);
 }
 
-.div-icon {
-  font-size: 1.8rem;
-}
-
-.div-card h3 {
-  font-size: 1rem;
-}
-
-/* MEMBERS LIST & ACTIVE WORKERS */
+/* JOBDESK CARD / FOLDER STYLE */
 .detail-section {
   background: var(--card-bg);
   padding: 24px;
@@ -250,81 +180,77 @@ body {
 .detail-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.members-grid {
+  display: flex;
+  flex-direction: column;
   gap: 16px;
 }
 
-.active-workers-box {
-  margin-top: 8px;
-  padding: 10px 14px;
-  background-color: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  border-radius: 8px;
-}
-
-.active-title {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #166534;
-
-}
-
-.workers-chips {
+.jobdesk-card {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: #fafafa;
+}
+
+.jobdesk-info h3 {
+  font-size: 1.05rem;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+
+.workers-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   flex-wrap: wrap;
+}
+
+.worker-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.worker-tags {
+  display: flex;
   gap: 6px;
-  margin-top: 6px;
+  flex-wrap: wrap;
 }
 
 .worker-chip {
   background: #dcfce7;
   color: #15803d;
   font-size: 0.8rem;
-  padding: 4px 10px;
+  padding: 3px 10px;
   border-radius: 20px;
   font-weight: 600;
 }
 
-.members-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.empty-text {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  font-style: italic;
 }
 
 .member-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   padding: 14px 18px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
 }
 
-.member-info h4 {
-  font-size: 1rem;
-}
-
-.member-info p {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin-top: 2px;
-}
-
-.badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.badge-working {
-  background: #fef3c7;
-  color: #b45309;
-}
-
 .badge-idle {
   background: #f1f5f9;
   color: #475569;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
 }
