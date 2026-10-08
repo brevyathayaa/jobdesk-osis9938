@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, onValue, set, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 // Konfigurasi Firebase
 const firebaseConfig = {
@@ -44,6 +44,9 @@ const divCards = document.querySelectorAll(".div-card");
 const detailSection = document.getElementById("division-detail");
 const currentDivName = document.getElementById("current-division-name");
 const membersList = document.getElementById("members-list");
+const activeWorkersContainer = document.getElementById("active-workers-container");
+const activeWorkersList = document.getElementById("active-workers-list");
+const changeDivContainer = document.getElementById("change-div-container");
 const backBtn = document.getElementById("back-btn");
 
 // Fitur Lihat/Sembunyikan Kata Sandi
@@ -109,32 +112,81 @@ function showDivision(divisi) {
 
 function renderMembers(divisi) {
   membersList.innerHTML = "";
+  activeWorkersList.innerHTML = "";
+  changeDivContainer.innerHTML = "";
+
+  let activeWorkers = [];
 
   Object.keys(userAccounts).forEach(key => {
     const name = userAccounts[key];
-    const userDiv = allData[name] || "Free";
+    const userData = allData[name] || { divisi: "Free", status: "idle" };
+    
+    // Jika tidak sedang working, divisi dianggap "Free" secara otomatis
+    let userDiv = userData.status === "working" ? userData.divisi : "Free";
+    let isWorking = userData.status === "working";
 
-    if ((divisi === "Free" && userDiv === "Free") || (userDiv === divisi)) {
+    // Kumpulkan nama anggota yang sedang aktif bekerja di divisi ini
+    if (divisi !== "Free" && userDiv === divisi && isWorking) {
+      activeWorkers.push(name);
+    }
+
+    // Tampilkan anggota jika sesuai dengan filter divisi yang dibuka
+    if (userDiv === divisi) {
       const item = document.createElement("div");
       item.className = "member-card";
       
       const isMe = name === currentUser;
+
       item.innerHTML = `
         <div class="member-info">
           <h4>${name} ${isMe ? '(Anda)' : ''}</h4>
-          <p>Status: ${userDiv === 'Free' ? 'Belum Ada Divisi' : userDiv}</p>
+          <p>Status: <span class="badge ${isWorking ? 'badge-working' : 'badge-idle'}">${isWorking ? `Sedang Mengerjakan (${userData.divisi}) 🛠️` : 'Belum Mengambil Jobdesk'}</span></p>
         </div>
-        ${isMe ? `<button class="btn btn-primary claim-btn" data-user="${name}">Pilih ke Divisi Ini</button>` : ''}
+        <div class="member-actions">
+          ${isMe && divisi !== "Free" ? `
+            <button class="btn ${isWorking && userData.divisi === divisi ? 'btn-danger' : 'btn-success'} action-work-btn">
+              ${isWorking && userData.divisi === divisi ? 'Selesai' : 'Kerjakan'}
+            </button>
+          ` : ''}
+        </div>
       `;
 
       membersList.appendChild(item);
+
+      // Logika Klik Tombol Kerjakan / Selesai
+      if (isMe && divisi !== "Free") {
+        const workBtn = item.querySelector(".action-work-btn");
+        workBtn.addEventListener("click", () => {
+          const isCurrentlyWorkingHere = isWorking && userData.divisi === divisi;
+
+          if (isCurrentlyWorkingHere) {
+            // Jika menekan SELESAI -> Kembalikan otomatis ke "Free" (Belum Mengambil Jobdesk)
+            set(ref(db, `jobdesk/${currentUser}`), {
+              divisi: "Free",
+              status: "idle"
+            });
+          } else {
+            // Jika menekan KERJAKAN -> Daftarkan ke divisi ini & ubah status ke "working"
+            set(ref(db, `jobdesk/${currentUser}`), {
+              divisi: divisi,
+              status: "working"
+            });
+          }
+        });
+      }
     }
   });
 
-  document.querySelectorAll(".claim-btn").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      const targetUser = e.target.getAttribute("data-user");
-      set(ref(db, `jobdesk/${targetUser}`), currentSelectedDivisi);
+  // Tampilkan daftar nama yang sedang mengerjakan tugas di bawah nama divisi
+  if (divisi !== "Free" && activeWorkers.length > 0) {
+    activeWorkersContainer.classList.remove("hidden");
+    activeWorkers.forEach(worker => {
+      const chip = document.createElement("span");
+      chip.className = "worker-chip";
+      chip.innerText = `👤 ${worker}`;
+      activeWorkersList.appendChild(chip);
     });
-  });
+  } else {
+    activeWorkersContainer.classList.add("hidden");
+  }
 }
