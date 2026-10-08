@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 // Konfigurasi Firebase
 const firebaseConfig = {
@@ -40,6 +40,11 @@ const divisionJobdesks = {
 let currentUser = null;
 let currentSelectedDivisi = "Free";
 let allData = {};
+
+// Helper untuk membuat ID aman di Firebase (misal: "Acara_Run Down")
+function makeJobKey(divisi, jobdesk) {
+  return `${divisi}_${jobdesk}`.replace(/[\.\#\$\[\]\/]/g, "_");
+}
 
 // Element Selector
 const loginModal = document.getElementById("login-modal");
@@ -91,7 +96,7 @@ logoutBtn.addEventListener("click", () => {
 });
 
 // Realtime Listener Firebase
-onValue(ref(db, "jobdesk/"), (snapshot) => {
+onValue(ref(db, "jobdesks_v2/"), (snapshot) => {
   allData = snapshot.val() || {};
   if (!detailSection.classList.contains("hidden")) {
     renderMembers(currentSelectedDivisi);
@@ -112,7 +117,12 @@ backBtn.addEventListener("click", () => {
 });
 
 function showDivision(divisi) {
-  currentDivName.innerText = `Divisi: ${divisi === 'Free' ? 'Belum Mengambil Jobdesk' : divisi}`;
+  if (divisi === 'Free') {
+    currentDivName.innerText = 'Belum Mengambil Jobdesk';
+  } else {
+    currentDivName.innerText = `Divisi: ${divisi}`;
+  }
+
   detailSection.classList.remove("hidden");
   renderMembers(divisi);
 }
@@ -120,7 +130,7 @@ function showDivision(divisi) {
 function renderMembers(divisi) {
   membersList.innerHTML = "";
 
-  // 1. TAMPILAN DIVISI DENGAN JOBDESK (Acara, Humas, Keamanan, Perlengkapan, Dokumentasi, Perlombaan)
+  // 1. TAMPILAN DIVISI DENGAN JOBDESK (Acara, Humas, Keamanan, dll)
   if (divisi !== "Free" && divisionJobdesks[divisi]) {
     const jobdesks = divisionJobdesks[divisi];
 
@@ -128,15 +138,9 @@ function renderMembers(divisi) {
       const card = document.createElement("div");
       card.className = "jobdesk-card";
 
-      // Cari siapa saja yang sedang mengerjakan jobdesk ini
-      let activeWorkers = [];
-      Object.keys(userAccounts).forEach(key => {
-        const name = userAccounts[key];
-        const userData = allData[name] || {};
-        if (userData.divisi === divisi && userData.jobdesk === jobdeskTitle && userData.status === "working") {
-          activeWorkers.push(name);
-        }
-      });
+      const jobKey = makeJobKey(divisi, jobdeskTitle);
+      const activeWorkersMap = allData[jobKey] || {};
+      const activeWorkers = Object.values(activeWorkersMap);
 
       const isMeWorkingHere = activeWorkers.includes(currentUser);
 
@@ -163,32 +167,33 @@ function renderMembers(divisi) {
 
       const actionBtn = card.querySelector(".work-btn");
       actionBtn.addEventListener("click", () => {
+        const userRef = ref(db, `jobdesks_v2/${jobKey}/${currentUser}`);
         if (isMeWorkingHere) {
-          // SELESAI -> Kembalikan otomatis ke "Belum Mengambil Jobdesk"
-          set(ref(db, `jobdesk/${currentUser}`), {
-            divisi: "Free",
-            jobdesk: "-",
-            status: "idle"
-          });
+          // SELESAI -> Hapus pengguna dari jobdesk ini saja
+          remove(userRef);
         } else {
-          // KERJAKAN -> Masukkan ke jobdesk ini secara khusus
-          set(ref(db, `jobdesk/${currentUser}`), {
-            divisi: divisi,
-            jobdesk: jobdeskTitle,
-            status: "working"
-          });
+          // KERJAKAN -> Tambahkan pengguna ke jobdesk ini
+          set(userRef, currentUser);
         }
       });
     });
 
   // 2. TAMPILAN DAFTAR "BELUM MENGAMBIL JOBDESK"
   } else {
+    // Cari pengguna mana saja yang saat ini sedang mengerjakan MINIMAL 1 jobdesk
+    const activeUsers = new Set();
+    Object.keys(allData).forEach(jobKey => {
+      const workersMap = allData[jobKey] || {};
+      Object.values(workersMap).forEach(userName => {
+        activeUsers.add(userName);
+      });
+    });
+
     Object.keys(userAccounts).forEach(key => {
       const name = userAccounts[key];
-      const userData = allData[name] || { divisi: "Free", status: "idle" };
 
-      // Muncul di daftar ini jika status tidak sedang mengerjakan tugas apapun
-      if (userData.status !== "working" || userData.divisi === "Free") {
+      // Jika nama pengguna TIDAK ADA di jobdesk mana pun, tampilkan di daftar "Belum Mengambil Jobdesk"
+      if (!activeUsers.has(name)) {
         const card = document.createElement("div");
         card.className = "member-card";
 
